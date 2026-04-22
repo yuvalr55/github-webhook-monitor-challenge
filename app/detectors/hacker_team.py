@@ -15,7 +15,7 @@ class HackerTeamDetector(BaseDetector):
         action = payload.get("action")
         return action == "created"
 
-    def detect(self, org_id: str, event_type: str, payload: Dict[str, Any], redis_client: Any) -> Optional[Alert]:
+    async def detect(self, org_id: str, event_type: str, payload: Dict[str, Any], redis_client: Any) -> Optional[Alert]:
         team_name = payload.get("team", {}).get("name", "").lower()
         
         if team_name.startswith(settings.SUSPICIOUS_TEAM_PREFIX.lower()):

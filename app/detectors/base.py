@@ -16,7 +16,7 @@ class BaseDetector(ABC):
         pass
 
     @abstractmethod
-    def detect(self, org_id: str, event_type: str, payload: Dict[str, Any], redis_client: Any) -> Optional[Alert]:
+    async def detect(self, org_id: str, event_type: str, payload: Dict[str, Any], redis_client: Any) -> Optional[Alert]:
         """
         Analyzes the payload and returns an Alert if suspicious behavior is found.
         """

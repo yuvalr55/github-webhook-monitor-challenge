@@ -12,7 +12,7 @@ class PushTimeDetector(BaseDetector):
     def supports(self, event_type: str, payload: Dict[str, Any]) -> bool:
         return event_type == "push"
 
-    def detect(self, org_id: str, event_type: str, payload: Dict[str, Any], redis_client: Any) -> Optional[Alert]:
+    async def detect(self, org_id: str, event_type: str, payload: Dict[str, Any], redis_client: Any) -> Optional[Alert]:
         # Try to get the push time from the payload, fallback to now
         # GitHub push events have many timestamp fields, we'll try to find one
         pushed_at_str = payload.get("repository", {}).get("pushed_at")

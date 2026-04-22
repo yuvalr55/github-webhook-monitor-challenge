@@ -19,7 +19,7 @@ async def lifespan(app: FastAPI):
     app.state.ingestion_service = IngestionService(app.state.redis)
     logger.info("Webhook server resources initialized.")
     yield
-    app.state.redis.close()
+    await app.state.redis.aclose()
     logger.info("Webhook server resources cleaned up.")
 
 

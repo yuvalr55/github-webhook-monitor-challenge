@@ -28,17 +28,15 @@ class Worker:
             try:
                 # 1. Fetch next eligible organization (Lease it)
                 logger.debug(f"[{self.worker_id}] Checking for next eligible organization...")
-                org_id = self.scheduler.lease_next_org()
-                
+                org_id = await self.scheduler.lease_next_org()
+
                 if not org_id:
-                    # No work to do, sleep briefly
                     await asyncio.sleep(settings.WORKER_IDLE_SLEEP_SECONDS)
                     continue
 
                 # 2. Attempt to acquire org-level lock
                 logger.debug(f"[{self.worker_id}] Attempting to acquire lock for org: {org_id}")
-                if not self.scheduler.acquire_org_lock(org_id, self.worker_id):
-                    # Someone else is processing this org, ignore for now
+                if not await self.scheduler.acquire_org_lock(org_id, self.worker_id):
                     continue
 
                 try:
@@ -48,15 +46,13 @@ class Worker:
                 finally:
                     # 4. Release lock and mark as ready for next batch if work remains
                     logger.debug(f"[{self.worker_id}] Releasing lock for org: {org_id}")
-                    self.scheduler.release_org_lock(org_id, self.worker_id)
-                    
+                    await self.scheduler.release_org_lock(org_id, self.worker_id)
+
                     if processed_any:
-                        # We processed something, might be more work or we want to stay eligible
-                        self.scheduler.complete_org_processing(org_id)
+                        await self.scheduler.complete_org_processing(org_id)
                     else:
-                        # No work left in stream, remove from scheduler to stop polling
                         logger.info(f"[{self.worker_id}] No more work for org: {org_id}. Removing from scheduler.")
-                        self.scheduler.remove_org(org_id)
+                        await self.scheduler.remove_org(org_id)
                     
             except Exception as e:
                 logger.error(f"Error in worker loop: {e}", exc_info=True)
@@ -66,7 +62,7 @@ class Worker:
         stream_key = f"stream:org:{org_id}"
         
         # Read batch from stream
-        entries = self.redis.xread({stream_key: "0-0"}, count=settings.BATCH_SIZE)
+        entries = await self.redis.xread({stream_key: "0-0"}, count=settings.BATCH_SIZE)
         
         if not entries:
             return False
@@ -86,7 +82,7 @@ class Worker:
                     )
                 
                 # Acknowledge
-                self.redis.xdel(stream_key, entry_id)
+                await self.redis.xdel(stream_key, entry_id)
             except Exception as e:
                 logger.error(f"Failed to process entry {entry_id}: {e}")
 
