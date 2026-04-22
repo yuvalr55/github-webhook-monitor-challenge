@@ -1,0 +1,10 @@
+venv/
+.env
+__pycache__/
+*.pyc
+.pytest_cache/
+.vscode/
+*.db
+*.rdb
+*.log
+*.settings
