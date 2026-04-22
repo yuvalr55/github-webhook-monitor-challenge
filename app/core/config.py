@@ -6,6 +6,7 @@ class Settings(BaseSettings):
     REDIS_URL: str
 
     # Worker
+    NUM_CONSUMERS: int
     BATCH_SIZE: int
     ORG_LOCK_TTL_SECONDS: int
     ORG_LEASE_DURATION_SECONDS: int

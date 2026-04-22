@@ -90,10 +90,8 @@ class Worker:
         return True
 
 
-NUM_CONSUMERS = 3
-
 async def main():
-    workers = [Worker() for _ in range(NUM_CONSUMERS)]
+    workers = [Worker() for _ in range(settings.NUM_CONSUMERS)]
     await asyncio.gather(*[w.run() for w in workers])
 
 if __name__ == "__main__":
